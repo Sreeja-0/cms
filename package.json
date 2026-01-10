@@ -2,12 +2,13 @@
   "name": "cms-assignment",
   "version": "1.0.0",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "db:seed": "tsx prisma/seed.ts",
-    "build": "nest build",
-    "start": "node dist/main",
-    "start:prod": "node dist/main"
-  },
+  "build": "tsc",
+  "start": "node dist/main",
+  "start:prod": "node dist/main",
+  "start:dev": "nest start --watch",
+  "prisma:generate": "prisma generate"
+},
+
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
     "@types/node": "^25.0.5",
@@ -31,3 +32,4 @@
   "license": "ISC",
   "type": "commonjs"
 }
+
