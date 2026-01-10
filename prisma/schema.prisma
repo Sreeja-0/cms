@@ -1,0 +1,146 @@
+// This is your schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Status {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ContentType {
+  VIDEO
+  ARTICLE
+}
+
+enum AssetVariant {
+  PORTRAIT
+  LANDSCAPE
+  SQUARE
+  BANNER
+}
+
+enum AssetType {
+  POSTER
+  THUMBNAIL
+  SUBTITLE
+}
+
+model Program {
+  id                 String         @id @default(uuid())
+  title              String
+  description        String?
+  language_primary   String
+  languages_available String[]
+  status             Status         @default(DRAFT)
+  published_at       DateTime?
+  created_at         DateTime       @default(now())
+  updated_at         DateTime       @updatedAt
+
+  // Relations
+  topics             TopicProgram[]
+  terms              Term[]
+  assets             ProgramAsset[]
+
+  @@unique([language_primary], name: "unique_program_language")
+  @@index([status, language_primary, published_at])
+  @@map("programs")
+}
+
+model Term {
+  id          String   @id @default(uuid())
+  program_id  String
+  term_number Int
+  title       String?
+  created_at  DateTime @default(now())
+
+  program     Program  @relation(fields: [program_id], references: [id])
+  lessons     Lesson[]
+
+  @@unique([program_id, term_number])
+  @@map("terms")
+}
+
+model Lesson {
+  id                       String         @id @default(uuid())
+  term_id                  String
+  lesson_number            Int
+  title                    String
+  content_type             ContentType
+  duration_ms              Int?
+  is_paid                  Boolean        @default(false)
+  content_language_primary String
+  content_languages_available String[]
+  content_urls_by_language  Json
+  subtitle_languages       String[]
+  subtitle_urls_by_language Json?
+  status                   Status         @default(DRAFT)
+  publish_at               DateTime?
+  published_at             DateTime?
+  created_at               DateTime       @default(now())
+  updated_at               DateTime       @updatedAt
+
+  term     Term          @relation(fields: [term_id], references: [id])
+  assets   LessonAsset[]
+
+  @@unique([term_id, lesson_number])
+  @@index([status, publish_at])
+  @@index([term_id, lesson_number])
+  @@map("lessons")
+}
+
+model Topic {
+  id          String         @id @default(uuid())
+  name        String         @unique
+  programs    TopicProgram[]
+
+  @@map("topics")
+}
+
+model TopicProgram {
+  program_id String
+  topic_id   String
+
+  program Program @relation(fields: [program_id], references: [id])
+  topic   Topic   @relation(fields: [topic_id], references: [id])
+
+  @@id([program_id, topic_id])
+  @@map("topic_programs")
+}
+
+model ProgramAsset {
+  id          String       @id @default(uuid())
+  program_id  String
+  language    String
+  variant     AssetVariant
+  asset_type  AssetType    @default(POSTER)
+  url         String
+
+  program Program @relation(fields: [program_id], references: [id])
+
+  @@unique([program_id, language, variant, asset_type])
+  @@map("program_assets")
+}
+
+model LessonAsset {
+  id          String       @id @default(uuid())
+  lesson_id   String
+  language    String
+  variant     AssetVariant?
+  asset_type  AssetType
+  url         String
+
+  lesson Lesson @relation(fields: [lesson_id], references: [id])
+
+  @@unique([lesson_id, language, variant, asset_type])
+  @@map("lesson_assets")
+}
