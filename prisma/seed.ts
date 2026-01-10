@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  await prisma.user.upsert({
+  await prisma.program.create({
     where: { email: 'editor@example.com' },
     update: {},
     create: {
@@ -18,7 +18,7 @@ async function main() {
     data: {
       title: 'Welcome Lesson',
       content: 'This is your first CMS lesson!',
-      status: 'published',
+      status: "PUBLISHED",
       userId: 1
     }
   });
@@ -29,3 +29,4 @@ async function main() {
 main()
   .catch((e) => console.error(e))
   .finally(async () => await prisma.$disconnect());
+
