@@ -4,16 +4,15 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  // Create Topics
-  const topics = await prisma.topic.createMany({
-    data: [
-      { name: 'Introduction to Programming' },
-      { name: 'Data Structures' },
-      { name: 'Algorithms' }
-    ]
+  // 1. Create Topics (individual creates for IDs)
+  const introTopic = await prisma.topic.create({
+    data: { name: 'Introduction to Programming' }
+  });
+  const dataTopic = await prisma.topic.create({
+    data: { name: 'Data Structures' }
   });
 
-  // Create Program 1 (Telugu)
+  // 2. Create Program 1 (Telugu)
   const program1 = await prisma.program.create({
     data: {
       title: 'Complete Web Development - Telugu',
@@ -21,25 +20,12 @@ async function main() {
       languagePrimary: 'te',
       languagesAvailable: ['te', 'en'],
       topics: {
-        connect: [{ name: 'Introduction to Programming' }, { name: 'Data Structures' }]
+        connect: [{ id: introTopic.id }, { id: dataTopic.id }]
       }
     }
   });
 
-  // Create Program 2 (English)  
-  const program2 = await prisma.program.create({
-    data: {
-      title: 'Advanced React Patterns',
-      description: 'Master React with hooks and patterns',
-      languagePrimary: 'en',
-      languagesAvailable: ['en'],
-      topics: {
-        connect: [{ name: 'Introduction to Programming' }]
-      }
-    }
-  });
-
-  // Create Terms
+  // 3. Create Term 1
   const term1 = await prisma.term.create({
     data: {
       programId: program1.id,
@@ -48,41 +34,43 @@ async function main() {
     }
   });
 
-  // Create Lessons with multi-language + assets
-  await prisma.lesson.createMany({
-    data: [
-      {
-        termId: term1.id,
-        lessonNumber: 1,
-        title: 'What is Programming?',
-        contentType: 'VIDEO',
-        durationMs: 600000, // 10 mins
-        contentLanguagePrimary: 'te',
-        contentLanguagesAvailable: ['te', 'en'],
-        contentUrlsByLanguage: {
-          te: 'https://example.com/videos/te/lesson1.mp4',
-          en: 'https://example.com/videos/en/lesson1.mp4'
-        },
-        status: 'PUBLISHED',
-        publishedAt: new Date()
+  // 4. Create Lessons
+  await prisma.lesson.create({
+    data: {
+      termId: term1.id,
+      lessonNumber: 1,
+      title: 'What is Programming?',
+      contentType: 'VIDEO',
+      durationMs: 600000,
+      contentLanguagePrimary: 'te',
+      contentLanguagesAvailable: ['te', 'en'],
+      contentUrlsByLanguage: { 
+        te: 'https://example.com/videos/te/lesson1.mp4',
+        en: 'https://example.com/videos/en/lesson1.mp4'
       },
-      {
-        termId: term1.id,
-        lessonNumber: 2,
-        title: 'First HTML Page',
-        contentType: 'ARTICLE',
-        contentLanguagePrimary: 'te',
-        contentLanguagesAvailable: ['te'],
-        contentUrlsByLanguage: { te: 'https://example.com/articles/te/html1' },
-        status: 'SCHEDULED',
-        publishAt: new Date(Date.now() + 2 * 60 * 1000) // 2 mins from now
-      }
-    ]
+      status: 'PUBLISHED',
+      publishedAt: new Date()
+    }
   });
+
+  await prisma.lesson.create({
+    data: {
+      termId: term1.id,
+      lessonNumber: 2,
+      title: 'First HTML Page',
+      contentType: 'ARTICLE',
+      contentLanguagePrimary: 'te',
+      contentLanguagesAvailable: ['te'],
+      contentUrlsByLanguage: { te: 'https://example.com/articles/te/html1' },
+      status: 'SCHEDULED',
+      publishAt: new Date(Date.now() + 2 * 60 * 1000)
+    }
+  });
+
+  console.log('✅ Seed COMPLETE! 1 Program + 1 Term + 2 Lessons + Topics');
 }
 
 main()
-  .catch(e => console.error(e))
+  .catch(e => console.error('Seed error:', e))
   .finally(async () => await prisma.$disconnect());
-
 
