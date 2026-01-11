@@ -8,16 +8,23 @@ export class ProgramsController {
   @Get('programs')
 async getPrograms() {
   try {
-    // 🚨 EMERGENCY: Simple query until migrations run
+    // 🚨 ULTRA-SIMPLE: No relations, no includes - JUST PROGRAMS TABLE
     const programs = await this.prisma.program.findMany({
-      // Remove relations temporarily - tables don't exist yet
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        languagePrimary: true,
+        status: true
+      }
     });
     return { data: programs, count: programs.length };
   } catch (error) {
-    console.error('ProgramsController error:', error);
+    console.error('ProgramsController ERROR:', error.message);
     throw new HttpException('Failed to fetch programs', HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
+
 
 
   @Post('programs')
@@ -39,6 +46,7 @@ async getPrograms() {
     }
   }
 }
+
 
 
 
