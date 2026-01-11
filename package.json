@@ -5,12 +5,13 @@
   "build": "prisma generate && tsc",
   "db:push": "prisma db push",
   "db:migrate": "prisma migrate dev",
-  "seed": "tsx prisma/seed.ts",
+  "seed": "node -r esbuild-register prisma/seed.ts",
   "db:reset": "prisma migrate reset",
   "start": "node dist/main",
   "start:prod": "node dist/main",
   "start:dev": "nest start --watch",
-  "prisma:generate": "prisma generate"
+  "prisma:generate": "prisma generate",
+  "build:seed": "tsc && npm run seed"
 },
 
   "devDependencies": {
@@ -36,6 +37,7 @@
   "license": "ISC",
   "type": "commonjs"
 }
+
 
 
 
