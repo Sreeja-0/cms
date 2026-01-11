@@ -1,45 +1,44 @@
+// prisma/seed.ts - ULTRA-SIMPLE DEBUG VERSION
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
 async function main() {
-  console.log('🌱 Starting seed...');
+  console.log('🚀 SEED STARTED - Connecting to DB...');
   
   try {
-    // Clear existing data (DEBUG)
-    await prisma.program.deleteMany();
-    await prisma.term.deleteMany();
-    await prisma.lesson.deleteMany();
-    await prisma.topic.deleteMany();
-    console.log('🧹 Cleared existing data');
-
-    // Create Topics
-    const introTopic = await prisma.topic.create({
-      data: { name: 'Introduction to Programming' }
-    });
-    console.log('✅ Topic1 created:', introTopic.id);
-
-    const dataTopic = await prisma.topic.create({
-      data: { name: 'Data Structures' }
-    });
-    console.log('✅ Topic2 created:', dataTopic.id);
-
-    // Create Program
-    const program1 = await prisma.program.create({
-      data: {
-        title: 'Complete Web Development - Telugu',
-        description: 'Full-stack web development course in Telugu',
-        languagePrimary: 'te',
-        languagesAvailable: ['te', 'en'],
-        topics: {
-          connect: [{ id: introTopic.id }, { id: dataTopic.id }]
+    // TEST 1: Check if tables exist
+    const programsCount = await prisma.program.count();
+    console.log('📊 Programs table exists:', programsCount);
+    
+    const topicsCount = await prisma.topic.count();
+    console.log('📊 Topics table exists:', topicsCount);
+    
+    if (topicsCount === 0) {
+      console.log('🌱 Creating FIRST-EVER seed data...');
+      
+      // Create 1 simple program (NO relations)
+      const program = await prisma.program.create({
+        data: {
+          title: 'Test Program Telugu',
+          description: 'Simple seed test',
+          languagePrimary: 'te',
+          languagesAvailable: ['te']
         }
-      }
-    });
-    console.log('✅ Program created:', program1.id);
-
-    // Rest of seed...
-    console.log('🎉 SEED COMPLETE! Check Railway Postgres UI');
+      });
+      console.log('✅ PROGRAM CREATED:', program.id, program.title);
+    }
+    
+    console.log('🎉 SEED COMPLETE! Test API now.');
   } catch (error) {
-    console.error('💥 SEED FAILED:', error);
-    throw error;
+    console.error('💥 SEED CRASHED:', error.message);
+    console.error('💥 FULL ERROR:', error);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
-
+main().catch(e => {
+  console.error('💥 FATAL:', e);
+  process.exit(1);
+});
