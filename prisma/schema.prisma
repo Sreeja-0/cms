@@ -1,6 +1,4 @@
-// This is your schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
+// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,9 +8,94 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Program {
+  id              String   @id @default(uuid())
+  title           String
+  description     String?
+  languagePrimary String
+  languagesAvailable String[]
+  status          Status   @default(DRAFT)
+  publishedAt     DateTime?
+  topics          Topic[]  @relation("ProgramTopics")
+  terms           Term[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([id])
+  @@index([status, languagePrimary, publishedAt])
+}
+
+model Term {
+  id          String   @id @default(uuid())
+  programId   String
+  termNumber  Int
+  title       String?
+  lessons     Lesson[]
+  program     Program   @relation(fields: [programId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([programId, termNumber])
+  @@index([programId])
+}
+
+model Lesson {
+  id                   String         @id @default(uuid())
+  termId               String
+  lessonNumber         Int
+  title                String
+  contentType          ContentType
+  durationMs           Int?
+  isPaid               Boolean        @default(false)
+  contentLanguagePrimary String
+  contentLanguagesAvailable String[]
+  contentUrlsByLanguage Json?
+  subtitleLanguages    String[]
+  subtitleUrlsByLanguage Json?
+  status               LessonStatus   @default(DRAFT)
+  publishAt            DateTime?
+  publishedAt          DateTime?
+  assets               LessonAsset[]
+  term                 Term           @relation(fields: [termId], references: [id], onDelete: Cascade)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  @@unique([termId, lessonNumber])
+  @@index([status, publishAt])
+  @@index([termId, lessonNumber])
+}
+
+model LessonAsset {
+  id        String @id @default(uuid())
+  lessonId  String
+  language  String
+  variant   AssetVariant
+  assetType AssetType
+  url       String
+  lesson    Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonId, language, variant, assetType])
+  @@index([lessonId])
+}
+
+model Topic {
+  id       String         @id @default(uuid())
+  name     String         @unique
+  programs ProgramTopic[]
+  
+  @@index([name])
+}
+
+model ProgramTopic {
+  programId String
+  topicId   String
+  program   Program @relation("ProgramTopics", fields: [programId], references: [id])
+  topic     Topic   @relation(fields: [topicId], references: [id])
+  
+  @@id([programId, topicId])
+}
+
 enum Status {
   DRAFT
-  SCHEDULED
   PUBLISHED
   ARCHIVED
 }
@@ -20,6 +103,13 @@ enum Status {
 enum ContentType {
   VIDEO
   ARTICLE
+}
+
+enum LessonStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  ARCHIVED
 }
 
 enum AssetVariant {
@@ -33,114 +123,4 @@ enum AssetType {
   POSTER
   THUMBNAIL
   SUBTITLE
-}
-
-model Program {
-  id                 String         @id @default(uuid())
-  title              String
-  description        String?
-  language_primary   String
-  languages_available String[]
-  status             Status         @default(DRAFT)
-  published_at       DateTime?
-  created_at         DateTime       @default(now())
-  updated_at         DateTime       @updatedAt
-
-  // Relations
-  topics             TopicProgram[]
-  terms              Term[]
-  assets             ProgramAsset[]
-
-  @@unique([language_primary], name: "unique_program_language")
-  @@index([status, language_primary, published_at])
-  @@map("programs")
-}
-
-model Term {
-  id          String   @id @default(uuid())
-  program_id  String
-  term_number Int
-  title       String?
-  created_at  DateTime @default(now())
-
-  program     Program  @relation(fields: [program_id], references: [id])
-  lessons     Lesson[]
-
-  @@unique([program_id, term_number])
-  @@map("terms")
-}
-
-model Lesson {
-  id                       String         @id @default(uuid())
-  term_id                  String
-  lesson_number            Int
-  title                    String
-  content_type             ContentType
-  duration_ms              Int?
-  is_paid                  Boolean        @default(false)
-  content_language_primary String
-  content_languages_available String[]
-  content_urls_by_language  Json
-  subtitle_languages       String[]
-  subtitle_urls_by_language Json?
-  status                   Status         @default(DRAFT)
-  publish_at               DateTime?
-  published_at             DateTime?
-  created_at               DateTime       @default(now())
-  updated_at               DateTime       @updatedAt
-
-  term     Term          @relation(fields: [term_id], references: [id])
-  assets   LessonAsset[]
-
-  @@unique([term_id, lesson_number])
-  @@index([status, publish_at])
-  @@index([term_id, lesson_number])
-  @@map("lessons")
-}
-
-model Topic {
-  id          String         @id @default(uuid())
-  name        String         @unique
-  programs    TopicProgram[]
-
-  @@map("topics")
-}
-
-model TopicProgram {
-  program_id String
-  topic_id   String
-
-  program Program @relation(fields: [program_id], references: [id])
-  topic   Topic   @relation(fields: [topic_id], references: [id])
-
-  @@id([program_id, topic_id])
-  @@map("topic_programs")
-}
-
-model ProgramAsset {
-  id          String       @id @default(uuid())
-  program_id  String
-  language    String
-  variant     AssetVariant
-  asset_type  AssetType    @default(POSTER)
-  url         String
-
-  program Program @relation(fields: [program_id], references: [id])
-
-  @@unique([program_id, language, variant, asset_type])
-  @@map("program_assets")
-}
-
-model LessonAsset {
-  id          String       @id @default(uuid())
-  lesson_id   String
-  language    String
-  variant     AssetVariant?
-  asset_type  AssetType
-  url         String
-
-  lesson Lesson @relation(fields: [lesson_id], references: [id])
-
-  @@unique([lesson_id, language, variant, asset_type])
-  @@map("lesson_assets")
 }
