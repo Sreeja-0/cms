@@ -15,10 +15,7 @@ async getPrograms() {
     console.error('ProgramsController error:', error);
     throw new HttpException('Failed to fetch programs', HttpStatus.INTERNAL_SERVER_ERROR);
   }
-}catch (error) {
-      console.error('ProgramsController error:', error);
-      throw new HttpException('Failed to fetch programs', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+}
   }
 
   @Post('programs')
@@ -40,5 +37,6 @@ async getPrograms() {
     }
   }
 }
+
 
 
