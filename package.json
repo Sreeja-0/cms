@@ -21,15 +21,17 @@
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
-  "dependencies": {
+ "dependencies": {
     "@nestjs/common": "^11.1.11",
     "@nestjs/core": "^11.1.11",
     "@nestjs/platform-express": "^11.1.11",
     "@prisma/client": "^6.19.1",
+    "express": "^4.19.2",        // ← ADD THIS BACK
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   }
 }
+
 
 
 
