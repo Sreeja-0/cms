@@ -1,6 +1,5 @@
-// prisma/seed.ts - ULTRA-SIMPLE DEBUG VERSION
-import { PrismaClient } from '@prisma/client';
-
+// prisma/seed.js - 100% Railway Compatible
+const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
@@ -42,3 +41,4 @@ main().catch(e => {
   console.error('💥 FATAL:', e);
   process.exit(1);
 });
+
