@@ -8,15 +8,17 @@ export class ProgramsController {
   @Get('programs')
 async getPrograms() {
   try {
-    // TEMP: Simple version until migrations run
-    const programs = await this.prisma.program.findMany();
+    // 🚨 EMERGENCY: Simple query until migrations run
+    const programs = await this.prisma.program.findMany({
+      // Remove relations temporarily - tables don't exist yet
+    });
     return { data: programs, count: programs.length };
   } catch (error) {
     console.error('ProgramsController error:', error);
     throw new HttpException('Failed to fetch programs', HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
-  }
+
 
   @Post('programs')
   async createProgram(@Body() createProgramDto: any) {
@@ -37,6 +39,7 @@ async getPrograms() {
     }
   }
 }
+
 
 
 
