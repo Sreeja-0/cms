@@ -2,7 +2,9 @@
   "name": "cms-assignment",
   "version": "1.0.0",
   "type": "commonjs",
-  
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
   "scripts": {
     "build": "nest build",
     "seed": "node prisma/seed.js",
@@ -12,8 +14,6 @@
     "db:push": "prisma db push",
     "prisma:generate": "prisma generate"
   },
-
-
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
     "@types/node": "^25.0.5",
@@ -26,16 +26,11 @@
     "@nestjs/core": "^11.1.11",
     "@nestjs/platform-express": "^11.1.11",
     "@prisma/client": "^6.19.1",
-    "express": "^4.19.2",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
-  },
-  "description": "CMS Assignment API",
-  "main": "dist/main.js",
-  "keywords": ["nestjs", "prisma", "cms"],
-  "author": "",
-  "license": "ISC"
+  }
 }
+
 
 
 
