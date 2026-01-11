@@ -1,54 +1,48 @@
 import { Controller, Get, Post, Body, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
-@Controller('api/api')
+@Controller('programs')
 export class ProgramsController {
   constructor(private prisma: PrismaService) {}
 
-  @Get('programs')
+  @Get()
   async getPrograms() {
-    try {
-      // ✅ REAL DATABASE QUERY (tables now exist)
-      const programs = await this.prisma.program.findMany({
-        include: {
-          terms: {
-            include: {
-              lessons: true
-            }
+    const programs = await this.prisma.program.findMany({
+      include: {
+        terms: {
+          include: {
+            lessons: true
           }
         }
-      });
-      return { data: programs, count: programs.length };
-    } catch (error) {
-      console.error('ProgramsController ERROR:', error.message);
-      return { data: [], count: 0 }; // Graceful fallback
-    }
+      }
+    });
+
+    return {
+      data: programs,
+      count: programs.length
+    };
   }
 
-  @Post('programs')
-  async createProgram(@Body() createProgramDto: any) {
+  @Post()
+  async createProgram(@Body() dto: any) {
     try {
       const program = await this.prisma.program.create({
         data: {
-          title: createProgramDto.title,
-          description: createProgramDto.description,
-          languagePrimary: createProgramDto.languagePrimary,
-          languagesAvailable: createProgramDto.languagesAvailable,
+          title: dto.title,
+          description: dto.description,
+          languagePrimary: dto.languagePrimary,
+          languagesAvailable: dto.languagesAvailable,
           status: 'DRAFT'
         }
       });
-      return { data: program, message: 'Program created successfully' };
+
+      return { data: program };
     } catch (error) {
-      console.error('Create program error:', error);
-      throw new HttpException('Failed to create program', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'Failed to create program',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 }
-
-
-
-
-
-
-
 
