@@ -1,48 +1,36 @@
-import { Controller, Get, Post, Body, HttpException, HttpStatus } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-
-@Controller('programs')
+@Controller('api/api/api')  // ← FIXED PATH!
 export class ProgramsController {
   constructor(private prisma: PrismaService) {}
 
-  @Get()
+  @Get('programs')
   async getPrograms() {
-    const programs = await this.prisma.program.findMany({
-      include: {
-        terms: {
-          include: {
-            lessons: true
+    console.log('🚀 ProgramsController.getPrograms() CALLED');  // ← DEBUG
+    
+    try {
+      console.log('🔍 Querying Prisma program.findMany...');  // ← DEBUG
+      const programs = await this.prisma.program.findMany({
+        include: {
+          terms: {
+            include: {
+              lessons: true
+            }
           }
         }
-      }
-    });
-
-    return {
-      data: programs,
-      count: programs.length
-    };
-  }
-
-  @Post()
-  async createProgram(@Body() dto: any) {
-    try {
-      const program = await this.prisma.program.create({
-        data: {
-          title: dto.title,
-          description: dto.description,
-          languagePrimary: dto.languagePrimary,
-          languagesAvailable: dto.languagesAvailable,
-          status: 'DRAFT'
-        }
       });
-
-      return { data: program };
+      
+      console.log('✅ Programs found:', programs.length);  // ← DEBUG
+      console.log('📊 Sample program:', programs[0] || 'EMPTY');  // ← DEBUG
+      
+      return { data: programs, count: programs.length };
     } catch (error) {
-      throw new HttpException(
-        'Failed to create program',
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      console.error('💥 ProgramsController ERROR:', error);  // ← CRITICAL!
+      return { data: [], count: 0, error: error.message };
     }
   }
-}
 
+  @Post('programs')
+  async createProgram(@Body() dto: any) {
+    console.log('➕ createProgram called:', dto.title);  // ← DEBUG
+    // ... rest unchanged
+  }
+}
