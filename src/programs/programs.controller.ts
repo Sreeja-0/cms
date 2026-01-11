@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Body, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
-@Controller('api/api/api')
+@Controller('programs')  // Clean path: /api/programs
 export class ProgramsController {
   constructor(private prisma: PrismaService) {}
 
-  @Get('programs')
+  @Get()
   async getPrograms() {
     try {
       const programs = await this.prisma.program.findMany({
@@ -25,7 +25,7 @@ export class ProgramsController {
     }
   }
 
-  @Post('programs')
+  @Post()
   async createProgram(@Body() dto: any) {
     try {
       const program = await this.prisma.program.create({
@@ -44,3 +44,4 @@ export class ProgramsController {
     }
   }
 }
+
