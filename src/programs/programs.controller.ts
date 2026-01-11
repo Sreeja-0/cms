@@ -7,23 +7,44 @@ export class ProgramsController {
 
   @Get('programs')
   async getPrograms() {
-    // 🚨 NO DATABASE - Returns empty until tables created
-    return { data: [], count: 0 };
+    try {
+      // ✅ REAL DATABASE QUERY (tables now exist)
+      const programs = await this.prisma.program.findMany({
+        include: {
+          terms: {
+            include: {
+              lessons: true
+            }
+          }
+        }
+      });
+      return { data: programs, count: programs.length };
+    } catch (error) {
+      console.error('ProgramsController ERROR:', error.message);
+      return { data: [], count: 0 }; // Graceful fallback
+    }
   }
 
   @Post('programs')
   async createProgram(@Body() createProgramDto: any) {
-    // 🚨 NO DATABASE - Fake success response
-    return { 
-      data: { 
-        id: 'demo-123', 
-        title: createProgramDto.title || 'Demo Program',
-        status: 'DRAFT' 
-      }, 
-      message: 'Program created successfully (demo mode)' 
-    };
+    try {
+      const program = await this.prisma.program.create({
+        data: {
+          title: createProgramDto.title,
+          description: createProgramDto.description,
+          languagePrimary: createProgramDto.languagePrimary,
+          languagesAvailable: createProgramDto.languagesAvailable,
+          status: 'DRAFT'
+        }
+      });
+      return { data: program, message: 'Program created successfully' };
+    } catch (error) {
+      console.error('Create program error:', error);
+      throw new HttpException('Failed to create program', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }
+
 
 
 
