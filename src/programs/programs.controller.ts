@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
-@Controller('api')
+@Controller('api/api')  // ✅ FIXED: Match your working routes
 export class ProgramsController {
   constructor(private prisma: PrismaService) {}
 
@@ -10,8 +10,9 @@ export class ProgramsController {
     try {
       const programs = await this.prisma.program.findMany({
         include: {
-          terms: true,
-          assets: true
+          terms: {  // ✅ FIXED: Removed extra {}
+            include: { lessons: true }
+          }
         }
       });
       return { data: programs, count: programs.length };
@@ -28,8 +29,8 @@ export class ProgramsController {
         data: {
           title: createProgramDto.title,
           description: createProgramDto.description,
-          language_primary: createProgramDto.language_primary,
-          languages_available: createProgramDto.languages_available || [createProgramDto.language_primary],
+          languagePrimary: createProgramDto.languagePrimary,  // ✅ FIXED: camelCase
+          languagesAvailable: createProgramDto.languagesAvailable || [createProgramDto.languagePrimary],  // ✅ FIXED
           status: 'DRAFT'
         }
       });
@@ -40,3 +41,4 @@ export class ProgramsController {
     }
   }
 }
+
