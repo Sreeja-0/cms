@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "scripts": {
   "build": "prisma generate && tsc",
+  "db:push": "prisma db push",
+  "db:migrate": "prisma migrate dev",
+  "seed": "tsx prisma/seed.ts",
+  "db:reset": "prisma migrate reset",
   "start": "node dist/main",
   "start:prod": "node dist/main",
   "start:dev": "nest start --watch",
@@ -32,5 +36,6 @@
   "license": "ISC",
   "type": "commonjs"
 }
+
 
 
