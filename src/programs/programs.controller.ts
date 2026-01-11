@@ -6,17 +6,16 @@ export class ProgramsController {
   constructor(private prisma: PrismaService) {}
 
   @Get('programs')
-  async getPrograms() {
-    try {
-      const programs = await this.prisma.program.findMany({
-        include: {
-          terms: {  // ✅ FIXED: Removed extra {}
-            include: { lessons: true }
-          }
-        }
-      });
-      return { data: programs, count: programs.length };
-    } catch (error) {
+async getPrograms() {
+  try {
+    // TEMP: Simple version until migrations run
+    const programs = await this.prisma.program.findMany();
+    return { data: programs, count: programs.length };
+  } catch (error) {
+    console.error('ProgramsController error:', error);
+    throw new HttpException('Failed to fetch programs', HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+}catch (error) {
       console.error('ProgramsController error:', error);
       throw new HttpException('Failed to fetch programs', HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -41,4 +40,5 @@ export class ProgramsController {
     }
   }
 }
+
 
