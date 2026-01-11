@@ -1,15 +1,16 @@
-@Controller('api/api/api')  // ← FIXED PATH!
+import { Controller, Get, Post, Body, HttpException, HttpStatus } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+
+@Controller('api/api/api')
 export class ProgramsController {
   constructor(private prisma: PrismaService) {}
 
   @Get('programs')
   async getPrograms() {
-    console.log('🚀 ProgramsController.getPrograms() CALLED');  // ← DEBUG
-    
     try {
-      console.log('🔍 Querying Prisma program.findMany...');  // ← DEBUG
       const programs = await this.prisma.program.findMany({
         include: {
+          topics: true,
           terms: {
             include: {
               lessons: true
@@ -17,20 +18,29 @@ export class ProgramsController {
           }
         }
       });
-      
-      console.log('✅ Programs found:', programs.length);  // ← DEBUG
-      console.log('📊 Sample program:', programs[0] || 'EMPTY');  // ← DEBUG
-      
       return { data: programs, count: programs.length };
     } catch (error) {
-      console.error('💥 ProgramsController ERROR:', error);  // ← CRITICAL!
-      return { data: [], count: 0, error: error.message };
+      console.error('ProgramsController ERROR:', error.message);
+      return { data: [], count: 0 };
     }
   }
 
   @Post('programs')
   async createProgram(@Body() dto: any) {
-    console.log('➕ createProgram called:', dto.title);  // ← DEBUG
-    // ... rest unchanged
+    try {
+      const program = await this.prisma.program.create({
+        data: {
+          title: dto.title,
+          description: dto.description,
+          languagePrimary: dto.languagePrimary,
+          languagesAvailable: dto.languagesAvailable,
+          status: 'DRAFT'
+        }
+      });
+      return { data: program, message: 'Program created successfully' };
+    } catch (error) {
+      console.error('Create program ERROR:', error.message);
+      throw new HttpException('Failed to create program', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }
