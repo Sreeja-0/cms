@@ -16,7 +16,7 @@ model Program {
   languagesAvailable String[]
   status          Status   @default(DRAFT)
   publishedAt     DateTime?
-  topics          Topic[]  @relation("ProgramTopics")
+  topics    ProgramTopic[]  @relation("ProgramTopics")
   terms           Term[]
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -124,3 +124,4 @@ enum AssetType {
   THUMBNAIL
   SUBTITLE
 }
+
